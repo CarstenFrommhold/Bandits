@@ -1,9 +1,9 @@
-from src.bandit import Agent, Bandit
+from src.bandit import Agent, NormBandit
 import numpy as np
 import pandas as pd
 import pickle
 
-BANDITS = [Bandit(mean=bandit_mean) for bandit_mean in np.arange(0.2, 2.1, 0.2)]
+BANDITS = [NormBandit(mean=bandit_mean) for bandit_mean in np.arange(0.2, 2.1, 0.2)]
 
 # Monte Carlo
 list_of_epsilon = np.arange(0.01, 0.301, 0.01)
