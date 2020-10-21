@@ -6,7 +6,7 @@ from scipy.stats import beta
 # Lets write a Bandit Agent Setup from Scratch
 
 Bandit_Expectation = namedtuple("Bandit_Expectation", ["No_explored", "Expected_mean"])
-Bandit_Beta_Expectation = namedtuple("Bandit_Beta_Expectation", ["Alpha", "Beta", "BetaScipy"])
+Bandit_Beta_Expectation = namedtuple("Bandit_Beta_Expectation", ["Alpha", "Beta"])
 
 def argmax(list):
     f = lambda i: list[i]
@@ -94,14 +94,12 @@ class Agent():
 
         # TODO: Generalize, this is for BernoulliDist
 
-        self.bandit_beta_expectations = [Bandit_Beta_Expectation(1, 1, beta(a=1, b=1)) for _ in self.list_of_bandits]
+        self.bandit_beta_expectations = [Bandit_Beta_Expectation(1, 1) for _ in self.list_of_bandits]
 
         for _ in range(0, self.T):
 
-            beta_samples = [bandit_beta_expectation.BetaScipy.pdf(x=betavariate(
-                bandit_beta_expectation.Alpha, bandit_beta_expectation.Beta
-            ))
-                for bandit_beta_expectation in self.bandit_beta_expectations]
+            beta_samples = [betavariate(bandit_beta_expectation.Alpha, bandit_beta_expectation.Beta)
+                            for bandit_beta_expectation in self.bandit_beta_expectations]
 
             # Play highest
             arm_played = argmax(beta_samples)
@@ -112,9 +110,7 @@ class Agent():
             else:
                 arm_beta +=1
             # Update
-            self.bandit_beta_expectations[arm_played] = Bandit_Beta_Expectation(arm_alpha,
-                                                                                arm_beta,
-                                                                                beta(a=arm_alpha, b=arm_beta))
+            self.bandit_beta_expectations[arm_played] = Bandit_Beta_Expectation(arm_alpha, arm_beta)
 
         # Print Expectations:
         for no, bandit_beta_expectation in enumerate(self.bandit_beta_expectations):

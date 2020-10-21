@@ -30,7 +30,7 @@ from src.bandit import NormBandit, Agent, BernoulliBandit
 # print(Agent01.bandit_expectations[0].Expected_mean)
 
 
-BANDITS = [BernoulliBandit(mean=0.3), BernoulliBandit(mean=0.7)]
+BANDITS = [BernoulliBandit(mean=0.7), BernoulliBandit(mean=0.55)]
 Agent01 = Agent(list_of_bandits=BANDITS, T=1000)
 Agent01.play_thompson_sampling()
 
