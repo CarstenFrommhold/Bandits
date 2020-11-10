@@ -2,3 +2,4 @@ numpy
 pandas
 scipy>=1.5.3
 seaborn>=0.11.0
+streamlit==0.69.2
