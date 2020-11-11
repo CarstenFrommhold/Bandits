@@ -3,7 +3,7 @@ from random import normalvariate, random, randint, betavariate
 from collections import namedtuple
 from scipy.stats import beta
 
-# Lets write a Bandit Agent Setup from Scratch
+""" Lets write a Bandit Agent Setup from Scratch """
 
 Bandit_Expectation = namedtuple("Bandit_Expectation", ["No_explored", "Expected_mean"])
 Bandit_Beta_Expectation = namedtuple("Bandit_Beta_Expectation", ["Alpha", "Beta"])
@@ -43,6 +43,7 @@ class Agent():
         self.no_of_bandits = len(list_of_bandits)
         self.sum_won = 0
         self.bandit_expectations = [Bandit_Expectation(0,0) for _ in self.list_of_bandits]
+        self.bandit_beta_expectations = [Bandit_Beta_Expectation(1, 1) for _ in self.list_of_bandits]
         self.expected_to_be_highest = 0
         self.T = T
 
@@ -90,27 +91,29 @@ class Agent():
                 self.play_bandit(bandit_no=self.expected_to_be_highest)
 
 
+    def play_bernoulli_bandit(self, bandit_no):
+
+        arm_alpha = self.bandit_beta_expectations[bandit_no].Alpha
+        arm_beta = self.bandit_beta_expectations[bandit_no].Beta
+        if self.list_of_bandits[bandit_no].play() > 0:
+            arm_alpha += 1
+        else:
+            arm_beta += 1
+        # Update
+        self.bandit_beta_expectations[bandit_no] = Bandit_Beta_Expectation(arm_alpha, arm_beta)
+
     def play_thompson_sampling(self):
 
         # TODO: Generalize, this is for BernoulliDist
 
-        self.bandit_beta_expectations = [Bandit_Beta_Expectation(1, 1) for _ in self.list_of_bandits]
-
         for _ in range(0, self.T):
 
+            # Sample
             beta_samples = [betavariate(bandit_beta_expectation.Alpha, bandit_beta_expectation.Beta)
                             for bandit_beta_expectation in self.bandit_beta_expectations]
 
-            # Play highest
-            arm_played = argmax(beta_samples)
-            arm_alpha = self.bandit_beta_expectations[arm_played].Alpha
-            arm_beta = self.bandit_beta_expectations[arm_played].Beta
-            if self.list_of_bandits[arm_played].play() > 0:
-                arm_alpha +=1
-            else:
-                arm_beta +=1
-            # Update
-            self.bandit_beta_expectations[arm_played] = Bandit_Beta_Expectation(arm_alpha, arm_beta)
+            bandit_to_play = argmax(beta_samples)
+            self.play_bernoulli_bandit(bandit_to_play)
 
         # Print Expectations:
         for no, bandit_beta_expectation in enumerate(self.bandit_beta_expectations):
